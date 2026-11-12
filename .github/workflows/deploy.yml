@@ -1,0 +1,84 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-zaz-artz
+  cancel-in-progress: false
+
+env:
+  AZURE_WEBAPP_NAME: zaz-artz
+  NODE_VERSION: "22"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck and lint
+        run: |
+          npx tsc --noEmit
+          npx eslint src
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Assemble standalone bundle
+        run: |
+          set -euo pipefail
+          # next.config.ts has output: "standalone". Depending on where Next
+          # places the tracing root, server.js is either directly in
+          # .next/standalone or nested one level deeper (e.g. standalone/web).
+          ROOT=$(dirname "$(find .next/standalone -maxdepth 2 -name server.js | head -n1)")
+          echo "standalone root: $ROOT"
+          mkdir -p "$ROOT/.next/static" "$ROOT/public"
+          cp -r .next/static/. "$ROOT/.next/static/"
+          cp -r public/. "$ROOT/public/"
+          rm -rf bundle && mkdir bundle
+          cp -a "$ROOT/." bundle/
+          test -f bundle/server.js
+          du -sh bundle
+          find bundle -type f | wc -l
+
+      - name: Deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: web/bundle
+
+      - name: Smoke test
+        working-directory: .
+        run: |
+          set -euo pipefail
+          URL="https://${AZURE_WEBAPP_NAME}.azurewebsites.net"
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/health" || true)
+            echo "attempt $i: /api/health -> $code"
+            if [ "$code" = "200" ]; then
+              home=$(curl -s -o /dev/null -w '%{http_code}' "$URL/")
+              echo "/ -> $home"
+              [ "$home" = "200" ] && exit 0
+            fi
+            sleep 10
+          done
+          echo "site did not become healthy" >&2
+          exit 1
