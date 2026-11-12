@@ -33,6 +33,7 @@ jobs:
 
       - name: Typecheck and lint
         run: |
+          npx next typegen
           npx tsc --noEmit
           npx eslint src
 

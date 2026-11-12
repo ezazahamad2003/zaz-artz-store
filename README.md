@@ -40,12 +40,28 @@ Open http://localhost:3000. Without `.env.local` the app still runs: designs and
 
 ## Deploy
 
+Deploys run on GitHub Actions from the private repo `ezazahamad2003/zaz-artz-store`. Every push to `main` runs [.github/workflows/deploy.yml](.github/workflows/deploy.yml) on a Linux runner:
+
+1. `npm ci`, `next typegen`, typecheck and lint in `web/`
+2. `next build` (output: standalone)
+3. Bundle `.next/standalone` + `.next/static` + `public`
+4. Zip-deploy to App Service `zaz-artz` with `azure/webapps-deploy@v3`, authenticated by the `AZURE_WEBAPP_PUBLISH_PROFILE` repo secret
+5. Smoke test `/api/health` and `/`
+
+A deploy takes a few minutes and never touches your machine. The workflow can also be started by hand from the Actions tab (workflow_dispatch). Oryx is disabled, so nothing is built on the server. The App Service startup command is `if [ -f server.js ]; then node server.js; else npm start; fi`, so it runs the standalone bundle from Actions and the `npm start` layout from the manual script alike. To rotate the secret:
+
+```bash
+az webapp deployment list-publishing-profiles -n zaz-artz -g zaz-artz --xml | gh secret set AZURE_WEBAPP_PUBLISH_PROFILE -R ezazahamad2003/zaz-artz-store
+```
+
+### Manual fallback
+
 ```bash
 cd web
 npm run deploy
 ```
 
-The script type-checks, lints, builds, installs Linux x64 production dependencies into `.deploy/`, zips the self-contained bundle and pushes it with `az webapp deploy`. No build happens on the server (Oryx is disabled); App Service just runs `npm start`.
+`web/scripts/deploy.sh` type-checks, lints, builds locally, installs Linux x64 production dependencies into a temp folder, zips the bundle and pushes it with `az webapp deploy`. It is slow from a OneDrive folder; prefer pushing to `main`.
 
 ## Regenerate template artwork
 
