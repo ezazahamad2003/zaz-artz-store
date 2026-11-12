@@ -1,0 +1,19 @@
+# dependencies / build output
+web/node_modules/
+web/.next/
+web/out/
+web/.deploy/
+web/*.tsbuildinfo
+web/next-env.d.ts
+
+# secrets
+web/.env*
+!web/.env.example
+
+# deploy artifacts
+*.zip
+
+# misc
+.DS_Store
+npm-debug.log*
+.claude/*.local.*

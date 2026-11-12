@@ -1,0 +1,43 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "seed": "tsx scripts/seed-images.mts",
+    "deploy": "bash scripts/deploy.sh",
+    "typecheck": "tsc --noEmit",
+    "photos:optimize": "tsx scripts/optimize-photos.mts",
+    "seed:photos": "tsx scripts/seed-photos.mts"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.10.2",
+    "@azure/identity": "^4.14.1",
+    "@azure/storage-blob": "^12.34.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.72.0",
+    "next": "16.4.6",
+    "openai": "^7.55.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "stripe": "^23.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^18.0.10",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.35.5",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  }
+}

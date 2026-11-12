@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #ffffff;
+  --bg-2: #fbf8f8;
+  --bg-3: #f4eeee;
+  --fg: #1a1518;
+  --fg-2: #6f6468;
+  --line: #ebe2e2;
+  --acid: #c8102e;      /* brand red (kept as --acid so existing utilities keep working) */
+  --acid-dark: #a30c25;
+  --pink: #e04a5f;      /* soft red accent */
+  --sky: #1a1518;       /* badges */
+  --font-display: var(--font-display-serif);
+  --font-body: var(--font-body-sans);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-line: var(--line);
+  --color-acid: var(--acid);
+  --color-pink: var(--pink);
+  --color-sky: var(--sky);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-acid { @apply bg-acid text-white hover:bg-[var(--acid-dark)] shadow-sm; }
+  .btn-ghost { @apply border border-line bg-white text-fg hover:border-fg; }
+  .btn-pink { @apply bg-pink text-white hover:brightness-95; }
+  
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-[0_1px_2px_rgba(26,21,24,0.04)];
+  }
+  
+  .input {
+    @apply w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-2/60 focus:border-acid;
+  }
+  
+  .label {
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wider text-fg-2;
+  }
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@layer components {
+  .chip {
+    @apply inline-flex items-center rounded-full border border-line bg-white px-3 py-1 text-xs font-medium text-fg-2;
+  }
+}
+
+::selection { background: var(--acid); color: #fff; }
